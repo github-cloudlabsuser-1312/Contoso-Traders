@@ -18,7 +18,7 @@ env:
   AKS_SECRET_NAME_ACR_PASSWORD: contoso-traders-acr-password
   AKS_SECRET_NAME_KV_ENDPOINT: contoso-traders-kv-endpoint
   AKS_SECRET_NAME_MI_CLIENTID: contoso-traders-mi-clientid
-  CARTS_ACA_NAME: contoso-traders-carts
+  ${{ secrets.ACR_PASSWORD }}: contoso-traders-carts
   CARTS_ACR_REPOSITORY_NAME: contosotradersapicarts
   CDN_PROFILE_NAME: contoso-traders-cdn
   SUB_DEPLOYMENT_REGION: eastus2
@@ -67,7 +67,7 @@ jobs:
         with:
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
-            az containerapp update -n ${{ env.CARTS_ACA_NAME }}${{ secrets.SUFFIX }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --image ${{ env.ACR_NAME }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
+            az containerapp update -n ${{ env.CARTS_ACA_NAME }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --image ${{ env.ACR_NAME }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
 
   deploy-products-api:
     runs-on: ubuntu-latest
