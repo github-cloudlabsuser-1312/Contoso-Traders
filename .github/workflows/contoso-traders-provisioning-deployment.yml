@@ -57,7 +57,7 @@ jobs:
         with:
           login-server: ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io
           username: ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}
-          password: ${{ steps.extract-acr-password.outputs.acrPassword }}
+          login-with-azure-cli: true
       - name: docker build
         run: docker build src -f ./src/ContosoTraders.Api.Carts/Dockerfile -t ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:latest -t ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
       - name: docker push (to acr)
