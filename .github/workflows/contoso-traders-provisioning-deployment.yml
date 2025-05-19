@@ -100,7 +100,7 @@ jobs:
         uses: azure/aks-set-context@v3
         with:
           resource-group: ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }}
-          cluster-name: ${{ env.AKS_CLUSTER_NAME }}${{ secrets.SUFFIX }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
       - name: setup kubectl
         uses: azure/setup-kubectl@v3
       - name: create kubernetes secret (acr password)
@@ -154,7 +154,7 @@ jobs:
       # create the ingress controller
       - name: create ingress controller
         run: |
-          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --name ${{ env.AKS_CLUSTER_NAME }}${{ secrets.SUFFIX }}
+          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --name ${{ env.AKS_CLUSTER_NAME }}
           ${{ steps.install-helm.outputs.helm-path }} repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
           ${{ steps.install-helm.outputs.helm-path }} repo update
           ${{ steps.install-helm.outputs.helm-path }} upgrade --install nginx-ingress ingress-nginx/ingress-nginx \
@@ -182,7 +182,7 @@ jobs:
           force: true
       - name: install cert-manager
         run: |
-          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --name ${{ env.AKS_CLUSTER_NAME }}${{ secrets.SUFFIX }}
+          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --name ${{ env.AKS_CLUSTER_NAME }}
           kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
       - name: sleep for 30 seconds
         run: sleep 30s
