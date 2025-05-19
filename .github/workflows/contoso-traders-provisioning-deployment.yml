@@ -55,19 +55,19 @@ jobs:
       - name: azure container registry login
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io
-          username: ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}
-          password: ${{ steps.extract-acr-password.outputs.acrPassword }}
+          login-server: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ env.ACR_NAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
       - name: docker build
-        run: docker build src -f ./src/ContosoTraders.Api.Carts/Dockerfile -t ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:latest -t ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
+        run: docker build src -f ./src/ContosoTraders.Api.Carts/Dockerfile -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:latest -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
       - name: docker push (to acr)
-        run: docker push --all-tags ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}
+        run: docker push --all-tags ${{ env.ACR_NAME }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}
       - name: deploy to aca
         uses: azure/CLI@v1
         with:
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
-            az containerapp update -n ${{ env.CARTS_ACA_NAME }}${{ secrets.SUFFIX }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --image ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
+            az containerapp update -n ${{ env.CARTS_ACA_NAME }}${{ secrets.SUFFIX }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --image ${{ env.ACR_NAME }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
 
   deploy-products-api:
     runs-on: ubuntu-latest
@@ -85,17 +85,17 @@ jobs:
         uses: azure/CLI@v1
         id: extract-acr-password
         with:
-          inlineScript: echo "acrPassword"="$(az acr credential show -n ${{ env.ACR_NAME }}${{ secrets.SUFFIX }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --query "passwords[0].value" --output tsv)" >> $GITHUB_OUTPUT
+          inlineScript: echo "acrPassword"="$(az acr credential show -n ${{ env.ACR_NAME }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ secrets.SUFFIX }} --query "passwords[0].value" --output tsv)" >> $GITHUB_OUTPUT
       - name: azure container registry login
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io
-          username: ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}
-          password: ${{ steps.extract-acr-password.outputs.acrPassword }}
+          login-server: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ env.ACR_NAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
       - name: docker build
-        run: docker build src -f ./src/ContosoTraders.Api.Products/Dockerfile -t ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.PRODUCTS_ACR_REPOSITORY_NAME }}:latest -t ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.PRODUCTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
+        run: docker build src -f ./src/ContosoTraders.Api.Products/Dockerfile -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.PRODUCTS_ACR_REPOSITORY_NAME }}:latest -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.PRODUCTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
       - name: docker push (to acr)
-        run: docker push --all-tags ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.PRODUCTS_ACR_REPOSITORY_NAME }}
+        run: docker push --all-tags ${{ env.ACR_NAME }}.azurecr.io/${{ env.PRODUCTS_ACR_REPOSITORY_NAME }}
       - name: set aks context
         uses: azure/aks-set-context@v3
         with:
@@ -107,9 +107,9 @@ jobs:
         uses: Azure/k8s-create-secret@v3.0
         with:
           secret-name: ${{ env.AKS_SECRET_NAME_ACR_PASSWORD }}
-          container-registry-url: ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io
-          container-registry-username: ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}
-          container-registry-password: ${{ steps.extract-acr-password.outputs.acrPassword }}
+          container-registry-url: ${{ env.ACR_NAME }}.azurecr.io
+          container-registry-username: ${{ env.ACR_NAME }}
+          container-registry-password: ${{ secrets.ACR_PASSWORD }}
       - name: get managedIdentityClientId
         uses: azure/CLI@v1
         id: get-managedIdentityClientId
@@ -143,7 +143,7 @@ jobs:
         uses: Azure/k8s-deploy@v4
         with:
           manifests: ./src/ContosoTraders.Api.Products/Manifests/Deployment.yaml
-          images: ${{ env.ACR_NAME }}${{ secrets.SUFFIX }}.azurecr.io/${{ env.PRODUCTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
+          images: ${{ env.ACR_NAME }}.azurecr.io/${{ env.PRODUCTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
           imagepullsecrets: ${{ env.AKS_SECRET_NAME_ACR_PASSWORD }}
           force: true
       - name: apply service manifest
